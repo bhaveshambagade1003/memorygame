@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Memory Game Flow Visualization</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+        }
+        
+        .flowchart {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .step {
+            background: #667eea;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 10px;
+            text-align: center;
+            max-width: 300px;
+            position: relative;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .step.decision {
+            background: #ffc107;
+            color: #333;
+            border-radius: 50px;
+        }
+        
+        .step.action {
+            background: #28a745;
+        }
+        
+        .step.end {
+            background: #dc3545;
+        }
+        
+        .arrow {
+            width: 0;
+            height: 0;
+            border-left: 10px solid transparent;
+            border-right: 10px solid transparent;
+            border-top: 15px solid #333;
+        }
+        
+        .branch {
+            display: flex;
+            gap: 50px;
+            align-items: flex-start;
+        }
+        
+        .branch-path {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .game-states {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 40px;
+        }
+        
+        .state-card {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .state-title {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .state-description {
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .architecture {
+            margin-top: 40px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+        
+        .component {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 10px 15px;
+            margin: 5px;
+            border-radius: 5px;
+            font-size: 12px;
+        }
+        
+        .component.html { background: #e34c26; }
+        .component.css { background: #1572b6; }
+        .component.js { background: #f7df1e; color: #333; }
+        .component.api { background: #28a745; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎮 Memory Game Flow & Architecture Visualization</h1>
+        
+        <h2>Game Flow Diagram</h2>
+        <div class="flowchart">
+            <div class="step">Start Game</div>
+            <div class="arrow"></div>
+            <div class="step action">Initialize Grid & Shuffle Cards</div>
+            <div class="arrow"></div>
+            <div class="step">Player Clicks Card</div>
+            <div class="arrow"></div>
+            <div class="step decision">Is Card Available?</div>
+            
+            <div class="branch">
+                <div class="branch-path">
+                    <div style="color: #dc3545; font-weight: bold;">NO</div>
+                    <div class="arrow"></div>
+                    <div class="step">Ignore Click</div>
+                </div>
+                <div class="branch-path">
+                    <div style="color: #28a745; font-weight: bold;">YES</div>
+                    <div class="arrow"></div>
+                    <div class="step action">Flip Card</div>
+                    <div class="arrow"></div>
+                    <div class="step decision">Two Cards Flipped?</div>
+                </div>
+            </div>
+            
+            <div class="branch">
+                <div class="branch-path">
+                    <div style="color: #dc3545; font-weight: bold;">NO</div>
+                    <div class="arrow"></div>
+                    <div class="step">Wait for Next Click</div>
+                </div>
+                <div class="branch-path">
+                    <div style="color: #28a745; font-weight: bold;">YES</div>
+                    <div class="arrow"></div>
+                    <div class="step decision">Cards Match?</div>
+                </div>
+            </div>
+            
+            <div class="branch">
+                <div class="branch-path">
+                    <div style="color: #dc3545; font-weight: bold;">NO</div>
+                    <div class="arrow"></div>
+                    <div class="step">Flip Cards Back</div>
+                    <div class="arrow"></div>
+                    <div class="step action">Switch Player (if 2P)</div>
+                </div>
+                <div class="branch-path">
+                    <div style="color: #28a745; font-weight: bold;">YES</div>
+                    <div class="arrow"></div>
+                    <div class="step action">Keep Cards Face Up</div>
+                    <div class="arrow"></div>
+                    <div class="step decision">All Pairs Matched?</div>
+                </div>
+            </div>
+            
+            <div class="branch">
+                <div class="branch-path">
+                    <div style="color: #dc3545; font-weight: bold;">NO</div>
+                    <div class="arrow"></div>
+                    <div class="step">Continue Game</div>
+                </div>
+                <div class="branch-path">
+                    <div style="color: #28a745; font-weight: bold;">YES</div>
+                    <div class="arrow"></div>
+                    <div class="step end">Game Over - Show Results</div>
+                </div>
+            </div>
+        </div>
+        
+        <h2>Game States</h2>
+        <div class="game-states">
+            <div class="state-card">
+                <div class="state-title">🎯 Game Initialization</div>
+                <div class="state-description">
+                    • Create grid based on size selection<br>
+                    • Generate card pairs<br>
+                    • Shuffle card positions<br>
+                    • Reset game counters
+                </div>
+            </div>
+            
+            <div class="state-card">
+                <div class="state-title">🎮 Active Game</div>
+                <div class="state-description">
+                    • Track flipped cards<br>
+                    • Handle card matching logic<br>
+                    • Update score and moves<br>
+                    • Manage player turns
+                </div>
+            </div>
+            
+            <div class="state-card">
+                <div class="state-title">⏳ Card Comparison</div>
+                <div class="state-description">
+                    • Two cards are face up<br>
+                    • Check for symbol match<br>
+                    • Apply match/no-match logic<br>
+                    • Update game state
+                </div>
+            </div>
+            
+            <div class="state-card">
+                <div class="state-title">🏆 Game Completion</div>
+                <div class="state-description">
+                    • All pairs matched<br>
+                    • Display final score<br>
+                    • Show completion time<br>
+                    • Offer restart option
+                </div>
+            </div>
+        </div>
+        
+        <h2>Technical Architecture</h2>
+        <div class="architecture">
+            <h3>Frontend Components:</h3>
+            <div class="component html">HTML Structure</div>
+            <div class="component css">CSS Styling & Animations</div>
+            <div class="component js">JavaScript Game Logic</div>
+            <div class="component js">Event Handlers</div>
+            <div class="component js">State Management</div>
+            
+            <h3>Data Sources:</h3>
+            <div class="component api">Star Wars API</div>
+            <div class="component api">Pokemon API</div>
+            <div class="component api">Flags API</div>
+            <div class="component js">Local Theme Data</div>
+            
+            <h3>Key Functions:</h3>
+            <div class="component js">initializeGame()</div>
+            <div class="component js">shuffleCards()</div>
+            <div class="component js">handleCardClick()</div>
+            <div class="component js">checkMatch()</div>
+            <div class="component js">updateGameState()</div>
+            <div class="component js">endGame()</div>
+        </div>
+        
+        <h2>Visual States Legend</h2>
+        <div class="game-states">
+            <div class="state-card">
+                <div class="state-title">🔵 Face Down</div>
+                <div class="state-description">
+                    Default state - card shows back design
+                </div>
+            </div>
+            
+            <div class="state-card">
+                <div class="state-title">🟢 Face Up</div>
+                <div class="state-description">
+                    Temporarily flipped - showing symbol
+                </div>
+            </div>
+            
+            <div class="state-card">
+                <div class="state-title">🔷 Matched</div>
+                <div class="state-description">
+                    Permanently face up - pair found
+                </div>
+            </div>
+            
+            <div class="state-card">
+                <div class="state-title">⚫ Disabled</div>
+                <div class="state-description">
+                    Temporarily unclickable during comparison
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

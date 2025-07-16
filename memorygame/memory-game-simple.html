@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Memory Game - HTML Version</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .game-container {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            max-width: 600px;
+            width: 100%;
+        }
+
+        .game-header {
+            text-align: center;
+            margin-bottom: 30px;
+            color: white;
+        }
+
+        .game-header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .game-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            color: white;
+            font-size: 1.1rem;
+        }
+
+        .game-setup {
+            margin-bottom: 30px;
+        }
+
+        .setup-section {
+            margin-bottom: 20px;
+        }
+
+        .setup-section label {
+            display: block;
+            margin-bottom: 10px;
+            color: white;
+            font-weight: 500;
+        }
+
+        .player-names {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .player-names input {
+            flex: 1;
+            padding: 10px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 1rem;
+        }
+
+        .player-names input::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .current-player {
+            text-align: center;
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+        }
+
+        .grid-options {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .grid-btn {
+            padding: 10px 20px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .grid-btn:hover, .grid-btn.selected {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.5);
+        }
+
+        .start-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+        }
+
+        .start-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .game-board {
+            display: grid;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .card {
+            width: 60px;
+            height: 60px;
+            perspective: 1000px;
+            cursor: pointer;
+        }
+
+        .card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            text-align: center;
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+        }
+
+        .card.flipped .card-inner {
+            transform: rotateY(180deg);
+        }
+
+        .card-front, .card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .card-front {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .card-back {
+            background: var(--card-color);
+            transform: rotateY(180deg);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .card.matched {
+            animation: matchPulse 0.5s ease-in-out;
+        }
+
+        @keyframes matchPulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        .game-completed {
+            text-align: center;
+            color: white;
+            font-size: 1.5rem;
+            margin-top: 20px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .card {
+                width: 50px;
+                height: 50px;
+            }
+            
+            .card-front, .card-back {
+                font-size: 1.2rem;
+            }
+            
+            .game-header h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="game-header">
+            <h1>🧠 Memory Game</h1>
+        </div>
+
+        <div id="gameSetup" class="game-setup">
+            <div class="setup-section">
+                <label>Memory Game - 8x8 Grid for 2 Players</label>
+                <div class="player-names">
+                    <input type="text" id="player1Name" placeholder="Player 1 Name" value="Player 1">
+                    <input type="text" id="player2Name" placeholder="Player 2 Name" value="Player 2">
+                </div>
+            </div>
+            <button class="start-btn" onclick="startGame()">Start Game</button>
+        </div>
+
+        <div id="gamePlay" class="hidden">
+            <div class="current-player" id="currentPlayer">Current Player: Player 1</div>
+            <div class="game-info">
+                <div>Moves: <span id="movesCount">0</span></div>
+                <div id="player1Score">Player 1: 0</div>
+                <div id="player2Score">Player 2: 0</div>
+            </div>
+            <div id="gameBoard" class="game-board"></div>
+            <div id="gameCompleted" class="game-completed hidden">
+                <h2>🎉 Game Completed! 🎉</h2>
+                <p id="winnerText">Winner: Player 1</p>
+                <div id="finalScores">
+                    <p>Final Scores:</p>
+                    <p id="finalPlayer1">Player 1: 0</p>
+                    <p id="finalPlayer2">Player 2: 0</p>
+                </div>
+                <p>Total Moves: <span id="finalMoves">0</span></p>
+                <button class="start-btn" onclick="resetGame()">Play Again</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class MemoryGame {
+            constructor() {
+                this.gridSize = 8; // Fixed 8x8 grid
+                this.cards = [];
+                this.flippedCards = [];
+                this.matchedPairs = 0;
+                this.moves = 0;
+                this.currentPlayer = 0; // 0 for player 1, 1 for player 2
+                this.players = [
+                    { name: "Player 1", score: 0 },
+                    { name: "Player 2", score: 0 }
+                ];
+                
+                // Color pairs for cards
+                this.colors = [
+                    '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7', '#DDA0DD', '#98D8C8', '#F7DC6F',
+                    '#BB8FCE', '#85C1E9', '#F8C471', '#82E0AA', '#F1948A', '#85C1E9', '#D2B4DE', '#A9DFBF',
+                    '#F9E79F', '#AED6F1', '#D5A6BD', '#A3E4D7', '#F4D03F', '#85C1E9', '#D7BDE2', '#A9DFBF',
+                    '#F8D7DA', '#D1ECF1', '#FFF3CD', '#D4EDDA', '#E2E3E5', '#FCE4EC', '#E8F5E8', '#FFF8E1'
+                ];
+            }
+
+            createCards() {
+                const totalCards = this.gridSize * this.gridSize;
+                const uniqueCards = totalCards / 2;
+                
+                this.cards = [];
+                
+                // Create pairs with colors
+                for (let i = 0; i < uniqueCards; i++) {
+                    const color = this.colors[i % this.colors.length];
+                    this.cards.push({
+                        id: i * 2,
+                        color: color,
+                        isFlipped: false,
+                        isMatched: false
+                    });
+                    this.cards.push({
+                        id: i * 2 + 1,
+                        color: color,
+                        isFlipped: false,
+                        isMatched: false
+                    });
+                }
+                
+                // Shuffle cards
+                this.shuffle(this.cards);
+            }
+
+            shuffle(array) {
+                for (let i = array.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [array[i], array[j]] = [array[j], array[i]];
+                }
+            }
+
+            renderBoard() {
+                const board = document.getElementById('gameBoard');
+                board.innerHTML = '';
+                board.style.gridTemplateColumns = `repeat(${this.gridSize}, 1fr)`;
+                
+                this.cards.forEach((card, index) => {
+                    const cardElement = document.createElement('div');
+                    cardElement.className = 'card';
+                    cardElement.setAttribute('data-card-id', card.id);
+                    cardElement.style.setProperty('--card-color', card.color);
+                    cardElement.innerHTML = `
+                        <div class="card-inner">
+                            <div class="card-front">?</div>
+                            <div class="card-back"></div>
+                        </div>
+                    `;
+                    
+                    cardElement.addEventListener('click', () => this.flipCard(card));
+                    board.appendChild(cardElement);
+                });
+            }
+
+            flipCard(card) {
+                if (card.isFlipped || card.isMatched || this.flippedCards.length >= 2) {
+                    return;
+                }
+
+                card.isFlipped = true;
+                this.flippedCards.push(card);
+                this.moves++;
+                
+                const cardElement = document.querySelector(`[data-card-id="${card.id}"]`);
+                if (cardElement) {
+                    cardElement.classList.add('flipped');
+                }
+                
+                this.updateUI();
+                
+                if (this.flippedCards.length === 2) {
+                    setTimeout(() => this.checkMatch(), 1000);
+                }
+            }
+
+            checkMatch() {
+                const [card1, card2] = this.flippedCards;
+                
+                if (card1.color === card2.color) {
+                    // Match found - current player gets a point
+                    card1.isMatched = true;
+                    card2.isMatched = true;
+                    this.matchedPairs++;
+                    this.players[this.currentPlayer].score++;
+                    
+                    // Add match animation
+                    const cardElements = document.querySelectorAll('.card.flipped:not(.matched)');
+                    cardElements.forEach(el => el.classList.add('matched'));
+                    
+                    // Current player continues (doesn't switch turns)
+                    
+                    if (this.matchedPairs === this.cards.length / 2) {
+                        setTimeout(() => this.gameCompleted(), 500);
+                    }
+                } else {
+                    // No match, flip back and switch player
+                    card1.isFlipped = false;
+                    card2.isFlipped = false;
+                    
+                    const cardElements = document.querySelectorAll('.card.flipped:not(.matched)');
+                    cardElements.forEach(el => el.classList.remove('flipped'));
+                    
+                    // Switch to next player
+                    this.currentPlayer = (this.currentPlayer + 1) % 2;
+                }
+                
+                this.flippedCards = [];
+                this.updateUI();
+            }
+
+            updateUI() {
+                document.getElementById('movesCount').textContent = this.moves;
+                document.getElementById('currentPlayer').textContent = `Current Player: ${this.players[this.currentPlayer].name}`;
+                document.getElementById('player1Score').textContent = `${this.players[0].name}: ${this.players[0].score}`;
+                document.getElementById('player2Score').textContent = `${this.players[1].name}: ${this.players[1].score}`;
+            }
+
+            gameCompleted() {
+                // Determine winner
+                let winner = this.players[0].score > this.players[1].score ? this.players[0] : 
+                           this.players[1].score > this.players[0].score ? this.players[1] : null;
+                
+                if (winner) {
+                    document.getElementById('winnerText').textContent = `Winner: ${winner.name}!`;
+                } else {
+                    document.getElementById('winnerText').textContent = "It's a tie!";
+                }
+                
+                document.getElementById('finalPlayer1').textContent = `${this.players[0].name}: ${this.players[0].score}`;
+                document.getElementById('finalPlayer2').textContent = `${this.players[1].name}: ${this.players[1].score}`;
+                document.getElementById('finalMoves').textContent = this.moves;
+                document.getElementById('gameCompleted').classList.remove('hidden');
+            }
+
+            reset() {
+                this.cards = [];
+                this.flippedCards = [];
+                this.matchedPairs = 0;
+                this.moves = 0;
+                this.currentPlayer = 0;
+                this.players[0].score = 0;
+                this.players[1].score = 0;
+                document.getElementById('gameCompleted').classList.add('hidden');
+                this.updateUI();
+            }
+        }
+
+        const game = new MemoryGame();
+
+        function startGame() {
+            // Get player names
+            const player1Name = document.getElementById('player1Name').value.trim() || "Player 1";
+            const player2Name = document.getElementById('player2Name').value.trim() || "Player 2";
+            
+            game.players[0].name = player1Name;
+            game.players[1].name = player2Name;
+            
+            game.createCards();
+            game.renderBoard();
+            
+            document.getElementById('gameSetup').classList.add('hidden');
+            document.getElementById('gamePlay').classList.remove('hidden');
+            
+            game.updateUI();
+        }
+
+        function resetGame() {
+            game.reset();
+            document.getElementById('gameSetup').classList.remove('hidden');
+            document.getElementById('gamePlay').classList.add('hidden');
+        }
+    </script>
+</body>
+</html>
